@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Борлуулалтын Хэрэгсэл — М Банк</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Nunito,sans-serif;background:#F0FDFB;color:#2D3142;min-height:100vh}
+:root{
+  --bg:#fff;--bg2:#F7FFFE;--bg3:#F0FDFB;--border:#C8EFE9;--text:#2D3142;--text2:#5a6175;--text3:#9198a8;
+  --teal:#3ECFB2;--teal-f:#E6FBF7;--teal-d:#2BA898;--teal-t:#0D5C50;
+  --red-f:#FEE9E7;--red-t:#8B2212;--red-b:#D94B35;
+  --yellow-f:#FFF8E6;--yellow-t:#7A5000;--yellow-b:#F0A500;
+  --green-f:#E6F7EE;--green-t:#1A5C35;--green-b:#28A05A;
+  --blue-f:#E6F2FF;--blue-t:#0C3D80;--blue-b:#1A6FD4;
+  --gray-f:#F0FDFB;--gray-t:#2D3142;--gray-b:#9198a8;
+  --amber-f:#FFF3E0;--amber-t:#6D3A00;--amber-b:#C07000;
+  --r:8px;--rl:12px
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#121B1A;--bg2:#192422;--bg3:#1E2D2B;--border:#2A4A45;--text:#E6FBF7;--text2:#9BC8C2;--text3:#5A8880;
+    --teal-f:#1A4040;--teal-t:#A0EED8;--red-f:#5C1A10;--red-t:#FFBDB5;--yellow-f:#4A3000;--yellow-t:#FFD580;
+    --green-f:#102A1C;--green-t:#8FE0B0;--blue-f:#0A2450;--blue-t:#A0C8F8;--gray-f:#2A4A45;--gray-t:#C5DCD8;
+    --amber-f:#3D2000;--amber-t:#FFCC80}
+  body{background:#121B1A}
+}
+/* Layout */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* Sidebar */
+.sb-logo{padding:14px 16px 10px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo-mark{width:32px;height:32px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.5px;flex-shrink:0}
+.sb-logo-text{font-size:13px;font-weight:600;color:var(--text)}
+.sb-logo-sub{font-size:10px;color:var(--text3)}
+.sb-section{padding:10px 12px 4px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.sb-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none;width:100%;text-align:left;transition:background .12s;margin:1px 6px;width:calc(100% - 12px)}
+.sb-btn:hover{background:var(--teal-f)}
+.sb-btn.active{background:var(--teal-f);color:var(--teal-t);font-weight:600}
+.sb-btn .cnt{margin-left:auto;font-size:11px;background:var(--bg3);border-radius:10px;padding:1px 7px;color:var(--text3)}
+.sb-btn.active .cnt{background:var(--teal);color:#fff}
+.sb-footer{margin-top:auto;padding:12px;border-top:0.5px solid var(--border)}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+
+/* Topbar */
+.topbar-title{font-size:15px;font-weight:600;color:var(--text);margin-right:auto}
+.search-wrap{position:relative}
+.search-wrap input{width:210px;padding:6px 10px 6px 32px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:13px;color:var(--text);outline:none;font-family:inherit}
+.search-wrap input:focus{border-color:var(--teal)}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3);pointer-events:none}
+.btn-primary{background:var(--teal);color:#fff;border:none;border-radius:var(--r);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .12s}
+.btn-primary:hover{opacity:.88}
+.btn-sec{background:none;border:0.5px solid var(--border);border-radius:var(--r);padding:7px 12px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .12s;font-family:inherit}
+.btn-sec:hover{background:var(--bg2)}
+.btn-excel{background:#28A05A;color:#fff;border:none;border-radius:var(--r);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .12s}
+.btn-excel:hover{opacity:.88}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:12px 14px}
+.stat-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:600;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.stat-card.good .stat-val{color:var(--teal-d)}
+.stat-card.warn .stat-val{color:var(--amber-b)}
+
+/* Table */
+.table-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.table-head{display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);gap:8px;flex-wrap:wrap}
+.table-head-title{font-size:13px;font-weight:600;color:var(--text)}
+.filter-row{display:flex;gap:6px;margin-left:auto}
+.filter-btn{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--text2);cursor:pointer;transition:background .12s;font-family:inherit}
+.filter-btn:hover,.filter-btn.active{background:var(--teal-f);color:var(--teal-t);border-color:var(--teal)}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;text-align:left;border-bottom:0.5px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;font-size:13px;color:var(--text);border-bottom:0.5px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:20px;padding:3px 9px;white-space:nowrap}
+.b-green{background:var(--green-f);color:var(--green-t)}
+.b-amber{background:var(--amber-f);color:var(--amber-t)}
+.b-red{background:var(--red-f);color:var(--red-t)}
+.b-gray{background:var(--gray-f);color:var(--gray-t)}
+.b-blue{background:var(--blue-f);color:var(--blue-t)}
+.b-teal{background:var(--teal-f);color:var(--teal-t)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-high{background:#D94B35}.dot-mid{background:#F0A500}.dot-low{background:#28A05A}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--rl);width:540px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal-header{display:flex;align-items:center;padding:16px 20px;border-bottom:0.5px solid var(--border)}
+.modal-title{font-size:15px;font-weight:600;color:var(--text);flex:1}
+.modal-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:2px}
+.modal-body{padding:20px}
+.form-row{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:13px;color:var(--text);outline:none;font-family:inherit}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--teal)}
+.form-row textarea{resize:vertical;min-height:60px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{padding:14px 20px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* Detail panel */
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:370px;background:var(--bg);border-left:0.5px solid var(--border);overflow-y:auto;display:none;z-index:100}
+.detail-panel.open{display:block}
+.dp-header{padding:16px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.dp-name{font-size:15px;font-weight:600;color:var(--text);flex:1}
+.dp-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3)}
+.dp-section{padding:14px 20px;border-bottom:0.5px solid var(--border)}
+.dp-label{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.dp-val{font-size:13px;color:var(--text);line-height:1.5}
+.dp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border)}
+.dp-row:last-child{border-bottom:none}
+.dp-key{font-size:12px;color:var(--text3)}
+.dp-v{font-size:13px;color:var(--text);font-weight:500}
+.history-item{padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;gap:10px}
+.history-item:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:4px;flex-shrink:0}
+.hist-text{font-size:12px;color:var(--text2);line-height:1.5}
+.hist-date{font-size:11px;color:var(--text3)}
+.dp-tabs{display:flex;border-bottom:0.5px solid var(--border)}
+.dp-tab{flex:1;padding:10px;text-align:center;font-size:12px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;font-weight:500}
+.dp-tab.active{color:var(--teal-t);border-bottom-color:var(--teal);font-weight:600}
+.dp-tabpanel{display:none;padding:14px 20px}
+.dp-tabpanel.active{display:block}
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+
+/* DISC GUIDE TAB */
+.page{display:none}
+.page.active{display:block}
+.disc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.disc-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:box-shadow .15s}
+.disc-card:hover{box-shadow:0 4px 20px rgba(62,207,178,.15)}
+.disc-card.selected{box-shadow:0 0 0 2px var(--teal);border-color:var(--teal)}
+.disc-card-header{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.disc-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.disc-title{font-size:14px;font-weight:700;color:var(--text)}
+.disc-sub{font-size:11px;color:var(--text3)}
+.disc-body{border-top:0.5px solid var(--border)}
+.disc-detail{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
+.disc-detail-header{padding:14px 18px;display:flex;align-items:center;gap:12px}
+.disc-detail-title{font-size:17px;font-weight:700;color:#fff}
+.disc-detail-sub{font-size:12px;color:rgba(255,255,255,.8);font-style:italic;margin-top:2px}
+.disc-section{padding:14px 18px;border-bottom:0.5px solid var(--border)}
+.disc-section:last-child{border-bottom:none}
+.disc-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.disc-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}
+.disc-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.disc-row-text{font-size:13px;color:var(--text);line-height:1.55;flex:1}
+.script-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;font-size:13px;color:var(--text);line-height:1.7;font-style:italic;position:relative}
+.script-copy-btn{position:absolute;top:10px;right:10px;background:none;border:0.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:inherit}
+.script-copy-btn:hover{background:var(--teal-f);color:var(--teal-t)}
+.dont-box{background:var(--red-f);border:0.5px solid #F5B8B0;border-radius:var(--r);padding:10px 14px;font-size:12.5px;color:var(--red-t);line-height:1.6}
+.close-box{background:var(--teal-f);border:0.5px solid var(--teal);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--teal-t);line-height:1.6;font-weight:600}
+.keyword-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:var(--teal-f);color:var(--teal-t);border:0.5px solid var(--teal)}
+
+/* Objection handler */
+.obj-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.obj-btn{padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s}
+.obj-btn:hover,.obj-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.obj-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.obj-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.obj-card-header{padding:10px 14px;font-size:12px;font-weight:700;color:#fff}
+.obj-card-body{padding:12px 14px;font-size:13px;color:var(--text);line-height:1.6}
+.obj-push{margin-top:10px;padding:8px 12px;border-radius:var(--r);font-size:12px;font-weight:600;line-height:1.5}
+
+/* Cheat sheet table */
+.cheat-table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--bg);border-radius:var(--rl);overflow:hidden;border:0.5px solid var(--border)}
+.cheat-table th{background:var(--text);color:var(--bg);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:10px 12px;text-align:left}
+.cheat-table td{padding:10px 12px;border-bottom:0.5px solid var(--border);vertical-align:top;line-height:1.5}
+.cheat-table tr:last-child td{border-bottom:none}
+.cheat-table tr:nth-child(even) td{background:var(--bg2)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1}
+
+/* Nav tabs top */
+.nav-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);background:var(--bg);padding:0 20px}
+.nav-tab{padding:13px 18px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2.5px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:6px}
+.nav-tab.active{color:var(--teal-t);border-bottom-color:var(--teal);font-weight:700}
+.nav-tab:hover:not(.active){background:var(--teal-f)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">M</div>
+    <div>
+      <div class="sb-logo-text">М Банк</div>
+      <div class="sb-logo-sub">Борлуулалтын хэрэгсэл</div>
+    </div>
+  </div>
+  <div style="padding:8px;flex:1;overflow-y:auto" id="sidebar-filters">
+    <div class="sb-section">Харагдац</div>
+    <button class="sb-btn active" onclick="filterView('all',this)"><i class="ti ti-list" style="font-size:15px"></i> Бүгд <span class="cnt" id="cnt-all">0</span></button>
+    <button class="sb-btn" onclick="filterView('hot',this)"><i class="ti ti-flame" style="font-size:15px;color:#D94B35"></i> Сонирхолтой <span class="cnt" id="cnt-hot">0</span></button>
+    <button class="sb-btn" onclick="filterView('wait',this)"><i class="ti ti-clock" style="font-size:15px;color:#F0A500"></i> Хүлээлгэ <span class="cnt" id="cnt-wait">0</span></button>
+    <button class="sb-btn" onclick="filterView('cold',this)"><i class="ti ti-x" style="font-size:15px;color:#9198a8"></i> Татгалзсан <span class="cnt" id="cnt-cold">0</span></button>
+    <button class="sb-btn" onclick="filterView('meeting',this)"><i class="ti ti-calendar" style="font-size:15px;color:#28A05A"></i> Уулзалт товлосон <span class="cnt" id="cnt-meeting">0</span></button>
+    
+    <div id="admin-worker-filters">
+      <div class="sb-section">Ажилтан</div>
+      <button class="sb-btn" onclick="filterWorker('A',this)"><div class="avatar" style="background:var(--teal-f);color:var(--teal-t);width:22px;height:22px;font-size:11px">A</div> Ажилтан A <span class="cnt" id="cnt-A">0</span></button>
+      <button class="sb-btn" onclick="filterWorker('B',this)"><div class="avatar" style="background:var(--blue-f);color:var(--blue-t);width:22px;height:22px;font-size:11px">B</div> Ажилтан B <span class="cnt" id="cnt-B">0</span></button>
+      <button class="sb-btn" onclick="filterWorker('C',this)"><div class="avatar" style="background:var(--amber-f);color:var(--amber-t);width:22px;height:22px;font-size:11px">C</div> Ажилтан C <span class="cnt" id="cnt-C">0</span></button>
+      <button class="sb-btn" onclick="filterWorker('D',this)"><div class="avatar" style="background:var(--red-f);color:var(--red-t);width:22px;height:22px;font-size:11px">D</div> Ажилтан D <span class="cnt" id="cnt-D">0</span></button>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="avatar" id="current-avatar" style="background:var(--teal-f);color:var(--teal-t)">A</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)" id="current-name">Ажилтан A</div>
+        <div style="font-size:11px;color:var(--text3)">М Банк</div>
+      </div>
+      <select id="worker-select" style="margin-left:auto;font-size:11px;padding:3px 6px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text);cursor:pointer" onchange="switchWorker(this.value)">
+        <option value="A">Ажилтан A</option>
+        <option value="B">Ажилтан B</option>
+        <option value="C">Ажилтан C</option>
+        <option value="D">Ажилтан D</option>
+        <option value="Ахлах">Админ (Ахлах)</option>
+      </select>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('calls',this)"><i class="ti ti-phone"></i> Дуудлагын бүртгэл</button>
+    <button class="nav-tab" onclick="switchPage('disc',this)"><i class="ti ti-brain"></i> DISC Гарын авлага</button>
+    <button class="nav-tab" onclick="switchPage('objections',this)"><i class="ti ti-shield"></i> Татгалзал давах</button>
+    <button class="nav-tab" onclick="switchPage('cheat',this)"><i class="ti ti-table"></i> Cheat Sheet</button>
+  </div>
+
+  <div id="page-calls" class="page active" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="topbar">
+      <span class="topbar-title" id="view-title">Бүх дуудлага</span>
+      <div class="search-wrap">
+        <i class="ti ti-search search-icon"></i>
+        <input type="text" placeholder="Харилцагч хайх..." id="search-input" oninput="renderTable()">
+      </div>
+      <button class="btn-excel" id="btn-excel-upload" onclick="triggerExcelInput()"><i class="ti ti-file-spreadsheet"></i> Excel Импорт</button>
+      <input type="file" id="excel-file-input" style="display:none" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
+      <button class="btn-sec" onclick="exportCSV()"><i class="ti ti-download"></i> CSV Экспорт</button>
+      <button class="btn-primary" onclick="openModal()"><i class="ti ti-plus"></i> Дуудлага бүртгэх</button>
+    </div>
+    <div class="content">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Нийт дуудлага</div><div class="stat-val" id="st-total">0</div><div class="stat-sub">бүртгэгдсэн</div></div>
+        <div class="stat-card good"><div class="stat-label">Сонирхолтой</div><div class="stat-val" id="st-hot">0</div><div class="stat-sub">уулзалт / мэдээлэл</div></div>
+        <div class="stat-card warn"><div class="stat-label">Уулзалт товлосон</div><div class="stat-val" id="st-meet">0</div><div class="stat-sub">харилцагч</div></div>
+        <div class="stat-card"><div class="stat-label">Конверси</div><div class="stat-val" id="st-conv">0%</div><div class="stat-sub">зорилт 30%+</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <span class="table-head-title">Харилцагчийн жагсаалт</span>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterPriority('all',this)">Бүгд</button>
+            <button class="filter-btn" onclick="filterPriority('Өндөр',this)" style="color:#D94B35">● Өндөр</button>
+            <button class="filter-btn" onclick="filterPriority('Дунд',this)" style="color:#F0A500">● Дунд</button>
+            <button class="filter-btn" onclick="filterPriority('Бага',this)" style="color:#28A05A">● Бага</button>
+          </div>
+        </div>
+        <div id="table-container">
+          <table>
+            <thead><tr>
+              <th>Харилцагч</th><th>Байршил</th><th>Төрөл</th><th>Гүйлгээ</th>
+              <th>Тэргүүлэх</th><th>Хариулт</th><th>Ажилтан</th><th>Төлөв</th><th>Сүүлд</th><th style="width:110px">Үйлдэл</th>
+            </tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-disc" class="page" style="display:none;flex:1;overflow:hidden">
+    <div class="content" style="max-width:900px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <h2 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">DISC Зан Төлөвийн Гарын Авлага</h2>
+        <p style="font-size:13px;color:var(--text3)">Харилцагчийн зан төлөвийг таньж, утасны яриагаа тохируулна уу</p>
+      </div>
+      <div class="disc-grid" id="disc-selector">
+        <div class="disc-card selected" onclick="showDisc('red',this)">
+          <div class="disc-card-header">
+            <div class="disc-badge" style="background:#D94B35">D</div>
+            <div><div class="disc-title">🔴 Улаан — Удирдагч</div><div class="disc-sub">Шийдэмгий · Яарсан · Хяналт эрхэмлэдэг</div></div>
+          </div>
+          <div class="disc-body" style="padding:10px 14px;font-size:12px;color:var(--text2)">Body: цоглог, шууд · Voice: хүчтэй, шууд · Words: үр дүн, өгөөж</div>
+        </div>
+        <div class="disc-card" onclick="showDisc('blue',this)">
+          <div class="disc-card-header">
+            <div class="disc-badge" style="background:#1A6FD4">C</div>
+            <div><div class="disc-title">🔵 Цэнхэр — Шинжээч</div><div class="disc-sub">Нягт нямбай · Логик · Тоо баримт</div></div>
+          </div>
+          <div class="disc-body" style="padding:10px 14px;font-size:12px;color:var(--text2)">Body: зай барьсан, хөндий · Voice: тайван, удаан · Words: баримт, логик</div>
+        </div>
+        <div class="disc-card" onclick="showDisc('green',this)">
+          <div class="disc-card-header">
+            <div class="disc-badge" style="background:#28A05A">S</div>
+            <div><div class="disc-title">🟢 Ногоон — Тогтвортой</div><div class="disc-sub">Дөлгөөн · Итгэлцэл · Эрсдэлээс айдаг</div></div>
+          </div>
+          <div class="disc-body" style="padding:10px 14px;font-size:12px;color:var(--text2)">Body: дулаан, зөөлөн · Voice: тайван, удаан · Words: баталгаа, хамтдаа</div>
+        </div>
+        <div class="disc-card" onclick="showDisc('yellow',this)">
+          <div class="disc-card-header">
+            <div class="disc-badge" style="background:#C07000">I</div>
+            <div><div class="disc-title">🟡 Шар — Нөлөөлөгч</div><div class="disc-sub">Нээлттэй · Яриасаг · Сэтгэл хөдлөл</div></div>
+          </div>
+          <div class="disc-body" style="padding:10px 14px;font-size:12px;color:var(--text2)">Body: нээлттэй, баяр хөөртэй · Voice: чанга, хурдан · Words: гоё, онцгой</div>
+        </div>
+      </div>
+      <div id="disc-detail-view"></div>
+    </div>
+  </div>
+
+  <div id="page-objections" class="page" style="display:none;flex:1;overflow:hidden">
+    <div class="content" style="max-width:900px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <h2 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Татгалзал Давах Тактик</h2>
+        <p style="font-size:13px;color:var(--text3)">Харилцагчийн татгалзалд DISC-д тохируулан хариулна уу</p>
+      </div>
+      <div class="obj-selector">
+        <button class="obj-btn active" onclick="showObj('price',this)">💸 "Үнэтэй байна"</button>
+        <button class="obj-btn" onclick="showObj('later',this)">⏳ "Дараа болъё"</button>
+        <button class="obj-btn" onclick="showObj('compare',this)">🔍 "Өөр газраас асуух"</button>
+        <button class="obj-btn" onclick="showObj('noneed',this)">🚫 "Зээл хэрэггүй"</button>
+        <button class="obj-btn" onclick="showObj('risk',this)">😰 "Төлж чадахгүй бол?"</button>
+      </div>
+      <div id="obj-detail"></div>
+    </div>
+  </div>
+
+  <div id="page-cheat" class="page" style="display:none;flex:1;overflow:hidden">
+    <div class="content" style="max-width:960px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <h2 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Closing Cheat Sheet</h2>
+        <p style="font-size:13px;color:var(--text3)">Бизнес эрхлэгчдэд зориулсан хурдан лавлах хүснэгт</p>
+      </div>
+      <table class="cheat-table">
+        <thead><tr>
+          <th>Төрөл</th><th>Юунаас айна?</th><th>Юуг хүсдэг?</th><th>Closing тактик</th><th>Түлхүүр өгүүлбэр</th><th>Шахалт / Push</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge" style="background:#FEE9E7;color:#8B2212;font-size:12px">🔴 Улаан</span></td>
+            <td style="color:var(--text2)">Цаг алдах, боломж алдах</td>
+            <td style="color:var(--text2)">Давуу тал, Ашиг, Хурд</td>
+            <td><b>Сонголт өгөх Close</b><br><span style="font-size:12px;color:var(--text3)">"А-г сонгох уу, Б-г үү?"</span></td>
+            <td style="font-style:italic;color:var(--teal-d)">"Яг одоо шийдье"</td>
+            <td style="font-size:12px;color:var(--red-t);">"Бодсоор байгаад боломжоо алдлаа шүү."</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:#E6F2FF;color:#0C3D80;font-size:12px">🔵 Цэнхэр</span></td>
+            <td style="color:var(--text2)">Алдагдал хүлээх, тоо зөрөх</td>
+            <td style="color:var(--text2)">Нарийвчлал, Логик</td>
+            <td><b>Логик дүгнэлт Close</b><br><span style="font-size:12px;color:var(--text3)">"Тоо баримт ингэж хэлж байна."</span></td>
+            <td style="font-style:italic;color:var(--teal-d)">"Тооцоо нь энэ байна"</td>
+            <td style="font-size:12px;color:var(--blue-t);">"Тоо баримт энэ зээлийг ашигтай гэж хэлж байна."</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:#E6F7EE;color:#1A5C35;font-size:12px">🟢 Ногоон</span></td>
+            <td style="color:var(--text2)">Алдаа гаргах, маргаан үүсэх</td>
+            <td style="color:var(--text2)">Итгэлцэл, Тусламж</td>
+            <td><b>Зөөлөн түлхэлт Close</b><br><span style="font-size:12px;color:var(--text3)">"Хариуцлага хуваалцах"</span></td>
+            <td style="font-style:italic;color:var(--teal-d)">"Би хариуцъя"</td>
+            <td style="font-size:12px;color:var(--green-t);">"Би таны талд байж, эрсдэлийг хуваалцана."</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:#FFF8E6;color:#7A5000;font-size:12px">🟡 Шар</span></td>
+            <td style="color:var(--text2)">Уйтгартай байх, анзаарагдахгүй</td>
+            <td style="color:var(--text2)">Нэр хүнд, Тренд</td>
+            <td><b>FOMO Close</b><br><span style="font-size:12px;color:var(--text3)">"Бүгд үүнийг авч байна."</span></td>
+            <td style="font-style:italic;color:var(--teal-d)">"Бүгд үүнийг ярьж байна"</td>
+            <td style="font-size:12px;color:var(--amber-t);">"Танай салбарынхан бүгд үүнийг авч байна."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Дуудлага бүртгэх</span>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Харилцагчийн нэр *</label><input type="text" id="f-name" required></div>
+        <div class="form-row"><label class="form-label">Утасны дугаар</label><input type="text" id="f-phone"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Байршил / Зазах</label><input type="text" id="f-loc" placeholder="ж.ш: Хүчит Шонхор"></div>
+        <div class="form-row">
+          <label class="form-label">Бизнесийн төрөл</label>
+          <select id="f-type">
+            <option value="">— сонгох —</option><option value="Хүнсний дэлгүүр">Хүнсний дэлгүүр</option>
+            <option value="ТҮЦ">ТҮЦ</option><option value="Цайны газар">Цайны газар</option>
+            <option value="Үсчин/Гоо сайхан">Үсчин/Гоо сайхан</option><option value="Авто засвар">Авто засвар</option>
+            <option value="Барилгын материал">Барилгын материал</option><option value="Хувцас захиалга">Хувцас захиалга</option>
+            <option value="Лангуу / Худалдаа">Лангуу / Худалдаа</option><option value="Бусад">Бусад</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">DISC Төрөл</label>
+          <select id="f-disc">
+            <option value="">— таньж чадаагүй —</option>
+            <option value="red">🔴 Улаан (Удирдагч)</option><option value="blue">🔵 Цэнхэр (Шинжээч)</option>
+            <option value="green">🟢 Ногоон (Тогтвортой)</option><option value="yellow">🟡 Шар (Нөлөөлөгч)</option>
+          </select>
+        </div>
+        <div class="form-row"><label class="form-label">Сарын гүйлгээ / Борлуулалт</label><input type="text" id="f-turnover" placeholder="ж.ш: 30сая"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">Тэргүүлэх зэрэг</label>
+          <select id="f-priority">
+            <option value="Бага">🟢 Бага</option><option value="Дунд">🟡 Дунд</option><option value="Өндөр">🔴 Өндөр</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Хариуцагч ажилтан</label>
+          <select id="f-worker">
+            <option value="A">Ажилтан A</option><option value="B">Ажилтан B</option>
+            <option value="C">Ажилтан C</option><option value="D">Ажилтан D</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">Харилцагчийн хариулт / Төлөв</label>
+          <select id="f-response">
+            <option value="">— сонгох —</option>
+            <option value="hot1">✅ Сонирхолтой — уулзалт товлов</option><option value="hot2">✅ Мэдээлэл хүссэн</option><option value="hot3">✅ Дахин авах сонирхол</option>
+            <option value="wait4">🟡 Дараа авна</option><option value="wait5">🟡 Дахин залгах</option><option value="wait6">🟡 Эргэлзэж байна</option><option value="wait7">🟡 Шаардлага хангахгүй</option><option value="wait8">🟡 Касс байна</option>
+            <option value="cold9">🔴 Татгалзав</option><option value="cold10">🔴 Утсаа авсангүй</option><option value="cold11">🔴 Дугаар буруу</option><option value="cold12">🔴 Тасалдав</option>
+            <option value="gray13">⚫ Өөр банктай</option><option value="gray14">⚫ Дэлгүүр хаасан/нүүсэн</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Зээл санал болгосон уу?</label>
+          <select id="f-loan"><option value="Тийм">Тийм</option><option value="Үгүй">Үгүй</option></select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Уулзалт товлосон огноо</label><input type="datetime-local" id="f-meeting"></div>
+        <div class="form-row"><label class="form-label">Дахин залгах огноо</label><input type="datetime-local" id="f-callback"></div>
+      </div>
+      <div class="form-row"><label class="form-label">Тайлбар / Тэмдэглэл</label><textarea id="f-note" placeholder="Яриаг товч тэмдэглэнэ..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="saveRecord()"><i class="ti ti-check"></i> Хадгалах</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="followup-modal">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <span class="modal-title">🔄 Дахин холбогдох түүх нэмэх</span>
+      <button class="modal-close" onclick="closeFollowupModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="followup-id">
+      <div class="form-row"><label class="form-label">Шинэ хариулт / Төлөв</label>
+        <select id="f-followup-response">
+          <option value="">— хэвээр үлдээх —</option>
+          <option value="hot1">✅ Сонирхолтой — уулзалт товлов</option><option value="hot2">✅ Мэдээлэл хүссэн</option><option value="hot3">✅ Дахин авах сонирхол</option>
+          <option value="wait4">🟡 Дараа авна</option><option value="wait5">🟡 Дахин залгах</option><option value="wait6">🟡 Эргэлзэж байна</option>
+          <option value="cold9">🔴 Татгалзав</option><option value="cold10">🔴 Утсаа авсангүй</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Уулзалт товлох</label><input type="datetime-local" id="f-followup-meeting"></div>
+        <div class="form-row"><label class="form-label">Дахин залгах</label><input type="datetime-local" id="f-followup-callback"></div>
+      </div>
+      <div class="form-row"><label class="form-label">Тэмдэглэл</label><textarea id="f-followup-note" placeholder="Ярианы үр дүн..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeFollowupModal()">Болих</button>
+      <button class="btn-primary" onclick="saveFollowup()"><i class="ti ti-check"></i> Хадгалах</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-header">
+    <div class="dp-name" id="dp-name">Харилцагчийн нэр</div>
+    <button class="dp-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="dp-tabs">
+    <button class="dp-tab active" onclick="switchDpTab('info',this)">Мэдээлэл</button>
+    <button class="dp-tab" onclick="switchDpTab('hist',this)">Түүх</button>
+  </div>
+  <div class="dp-tabpanel active" id="dp-panel-info"></div>
+  <div class="dp-tabpanel" id="dp-panel-hist"></div>
+</div>
+
+<div class="toast" id="toast">Мэдээлэл</div>
+</div>
+
+<script>
+// Үндсэн өгөгдөл
+let records = [];
+let currentUser = 'A'; // Анхдагч хэрэглэгч
+let isAdmin = false;   // Эрхийн төлөв
+let currentFilter = 'all';
+let currentWorkerFilter = null;
+let currentPriorityFilter = 'all';
+let currentDetailId = null;
+
+// Түүвэр мэдээлэл
+const MOCK_DATA = [
+  {id:'1', name:'Батсайхан (Хүчит Шонхор)', phone:'99112233', loc:'Хүчит Шонхор 5-12', type:'Барилгын материал', disc:'red', turnover:'45сая', priority:'Өндөр', worker:'A', response:'hot2', loan:'Тийм', status:'Сонирхолтой', createdAt:Date.now()-100000, updatedAt:Date.now(), history:[]},
+  {id:'2', name:'Сувд-Эрдэнэ (Нарантуул)', phone:'88005544', loc:'Нарантуул хүнс 33', type:'Хүнсний дэлгүүр', disc:'green', turnover:'28сая', priority:'Дунд', worker:'B', response:'wait5', loan:'Тийм', status:'Хүлээлгэ', createdAt:Date.now()-200000, updatedAt:Date.now(), history:[]},
+  {id:'3', name:'Болдбаатар (Авто засах)', phone:'95159515', loc:'Баянзүрх дүүрэг', type:'Авто засвар', disc:'blue', turnover:'15сая', priority:'Бага', worker:'C', response:'cold9', loan:'Үгүй', status:'Татгалзсан', createdAt:Date.now()-300000, updatedAt:Date.now(), history:[]}
+];
+
+// DISC гарын авлагын статик дата
+const DISC_DATA = {
+  red: { emoji:'🔴', code:'D', name:'Удирдагч', color:'#D94B35', bg:'#FEE9E7', textColor:'#8B2212', quote:'"Надад шууд үр дүн, хурд хэрэгтэй"', who:'Шийдэмгий, яарсан, үр дүнд чиглэсэн, хяналтыг гартаа авах дуртай.', recognize:'Шууд асуудалд орно, яриаг тасалдаг, цаг хожихыг хичээнэ.', tactics:[{icon:'⚡', text:'Яриаг сунжруулахгүй шууд давуу талыг хэл'},{icon:'💰', text:'Бизнесийн өсөлт ашгийг тоогоор харуул'},{icon:'📋', text:'2 сонголт өгч өөрөөр нь шийдвэрлүүл'}], keywords:['Үр дүн','Ашиг','Хурд','Шууд','Сонголт'], script:'"Сайн байна уу, [Нэр] захирал аа. Шууд ажилдаа оръё. Танд зориулж 150 саяын баталгаат зээл бэлдлээ. Үдээс өмнө материалаа өгвөл үдээс хойш дансанд орно. 12 сараар авах уу, 24 сараар уу?"', dont:'"Манай банкны үүсэл түүхийг танилцуулбал..." — Улаан төрөл шууд утсаа тасална.', closing:'"Энэ зээл танд өрсөлдөгчөөсөө түрүүлж алхах боломж өгнө. Яг одоо баталгаажуулах уу?"' },
+  blue: { emoji:'🔵', code:'C', name:'Шинжээч', color:'#1A6FD4', bg:'#E6F2FF', textColor:'#0C3D80', quote:'"Надад баримт, тоо, логик хэрэгтэй"', who:'Нягт нямбай, логик сэтгэлгээтэй, тоо баримтад дуртай, гэрээний нарийн ширийнийг шалгадаг.', recognize:'Нарийн ширийн асуулт асууна, сэтгэл хөдлөл бага гаргана, тэмдэглэл хөтөлнө.', tactics:[{icon:'📊', text:'Нарийвчилсан тоо, хүүг аравтын нарийвчлалтай хэл'},{icon:'✅', text:'Шимтгэл, торгуулийг түрүүлж үнэн зөв мэдээл'},{icon:'⏰', text:'Шийдвэр гаргах хугацаа өг, хүчээр бүү шах'}], keywords:['Статистик','Логик','Үндэслэл','Нарийн'], script:'"Сайн байна уу, [Нэр]. Би М Банкнаас бизнесийн зээлийн нөхцөл танилцуулахаар залгаж байна. Жилийн хүү 16.2%, сарын төлөлт X төгрөг болох бөгөөд ямар нэгэн далд шимтгэл байхгүй. Тооцооллыг танд файлаар илгээх үү?"', dont:'"Энэ маш гоё зээл, зүгээр л шууд авчих" — Итгэл алдана.', closing:'"Тоо баримт болон логик тооцоолол энэ зээлийг танд ашигтай гэдгийг харуулж байна. Файлыг шалгана уу."' },
+  green: { emoji:'🟢', code:'S', name:'Тогтвортой', color:'#28A05A', bg:'#E6F7EE', textColor:'#1A5C35', quote:'"Надад аюулгүй байдал, итгэлцэл хэрэгтэй"', who:'Дөлгөөн, эелдэг, эрсдэлээс айдаг, гэнэтийн өөрчлөлтөд дургүй, бусдад туслах дуртай.', recognize:'Уудаан тайван ярина, "бусадтай зөвлөлдөнө" гэсэн тайлбар хэлнэ.', tactics:[{icon:'🤝', text:'Найрсаг харилцаа тогтоо, итгэлцэл үүсгэ'},{icon:'🛡️', text:'Эрсдэлгүй, аюулгүй гэдгийг нь батал'},{icon:'🙋‍♂️', text:'Процессыг алхам алхмаар хөтөлж тусал'}], keywords:['Баталгаа','Итгэлтэй','Хамтдаа','Тусламж'], script:'"Сайн байна уу, [Нэр] эгч ээ. Сайхан зусаж байна уу? М Банкнаас таны бизнесийг дэмжих зөөлөн нөхцөлтэй зээл гаргаад байна. Би танд материалыг тань бүрдүүлэхэд алхам алхмаар тусалж, чирэгдэлгүй болгож өгье, та санаа зоволтгүй ээ."', dont:'"Яг одоо шийдэхгүй бол энэ урамшуулал дууслаа!" — Айгаад зугтана.', closing:'"Би таны талд байж, бүх зүйлийг найдвартай хариуцна. Хамтдаа эхлүүлэх үү?"' },
+  yellow: { emoji:'🟡', code:'I', name:'Нөлөөлөгч', color:'#C07000', bg:'#FFF8E6', textColor:'#7A5000', quote:'"Надад сонирхолтой, гоё байх хэрэгтэй"', who:'Нээлттэй, яриасаг, сэтгэл хөдлөл ихтэй, олны анхааралд байх дуртай. Деталь тоо баримтаас залхдаг.', recognize:'Гар хөдөлгөөн ихтэй, сонирхолтой түүх ярьдаг, хэт өөдрөг.', tactics:[{icon:'🔥', text:'Хувь хүний тухай ярилцаж уур амьсгал халаа'},{icon:'🌟', text:'Магтаал, онцгой байдал: "Зөвхөн ТАНД зориулсан"'},{icon:'🎨', text:'Зээл аваад амьдрал нь яаж гоё болохыг зураглах'}], keywords:['Онцгой','Шинэ тренд','Гоё','Нэр хүнд','VIP'], script:'"Хөөх, сайн байна уу [Нэр]! Манай хамгийн идэвхтэй TOP харилцагчтайгаа ярьж байгаадаа баяртай. Манай банкнаас танд зориулаад V.I.P Ногоон сувгийн зээл гаргасан. Танд шинэ гоё төлөвлөгөө байна уу? Сэтгэл хөдөлгөм төслийг тань санхүүжүүлье!"', dont:'"Гэрээний 4-р заалтын Б хэсгийг нарийвчлан уншъя..." — Унтаад өгнө.', closing:'"Энэхүү онцгой урамшуулал таны нэр хүндийг улам өсгөнө. Баяртай мэдээг яг одоо бүртгэх үү?"' }
+};
+
+const OBJECTIONS = {
+  price: { title:'💸 "Үнэтэй байна / Хүү өндөр байна" гэх үед', sub:'Үнэ цэнийг харуулж, DISC төлөвт тохируулж хариулах', answers:[{disc:'red', emoji:'🔴', label:'Улаан', color:'#D94B35', text:'"Хүү өндөр санагдаж болох ч манайх 1 цагийн дотор олгодог. Бусад банк шиг 2 долоо хоног хүлээж цаг алдах уу, эсвэл өнөөдөр ашгаа хийж эхлэх үү?"', push:'"Хурд бол ашиг."'},{disc:'blue', emoji:'🔵', label:'Цэнхэр', color:'#1A6FD4', text:'"Манай жилийн хүү 16.2%. Далд шимтгэл байхгүй тул бодит зардлаар бусад банкнаас 1.2%-иар хямд тусна. Тооцооллыг хамт харах уу?"', push:'"Тоо зөрөхгүй."'},{disc:'green', emoji:'🟢', label:'Ногоон', color:'#28A05A', text:'"Тийм ээ, санаа зовоож байгааг чинь ойлгож байна. Гэхдээ манайх эргэн төлөлтийн уян хатан нөхцөлтэй тул таны бизнест ямар ч дарамт үүсэхгүй."', push:'"Амар тайван итгэлтэй харилцаа."'},{disc:'yellow', emoji:'🟡', label:'Шар', color:'#C07000', text:'"Энэ бол зүгээр нэг зээл биш, манай VIP харилцагчийн эрх дагалдаж байгаа юм. Бусад хүмүүс энэ нөхцөлийг авч чаддаггүй шүү дээ!"', push:'"Онцгой боломж."'} ]},
+  later: { title:'⏳ "Дараа болъё / Одоо завгүй байна" гэх үед', sub:'Яаралтай байдал үүсгэх эсвэл дараа залгах цагийг тодорхой болгох', answers:[{disc:'red', emoji:'🔴', label:'Улаан', color:'#D94B35', text:'"Ойлголоо. Бодсоор байтал боломж алга болно шүү дээ. Яг одоо шийдвэл өнөөдөр багталж олгоно."', push:'"Боломж хүлээдэггүй."'},{disc:'blue', emoji:'🔵', label:'Цэнхэр', color:'#1A6FD4', text:'"Мэдээж, танд бодох хугацаа хэрэгтэй. Би маргааш яг 14:00 цагт залгаж тоон үзүүлэлтүүдийг эцэслэн ярилцах уу?"', push:'"Тодорхой цаг товлох."'},{disc:'green', emoji:'🟢', label:'Ногоон', color:'#28A05A', text:'"Тэгэлгүй яах вэ, таныг яаруулахгүй. Сайн бодоод гэр бүлийнхэнтэйгээ зөвлөлдөөрэй. Би танд туслахад хэзээд бэлэн."', push:'"Зөөлөн харилцаа."'},{disc:'yellow', emoji:'🟡', label:'Шар', color:'#C07000', text:'"Удахгүй энэ урамшуулалт эрх дуусах тул та бусдаас хоцорчихвол харамсалтай шүү дээ! Өнөөдөр амжиж нээчих үү?"', push:'"FOMO — Хоцрохоос айх."'} ]}
+};
+
+// Програм эхлэхэд
+window.onload = function() {
+  const local = localStorage.getItem('mbank_sales_records');
+  if(local) {
+    try { records = JSON.parse(local); } catch(e) { records = MOCK_DATA; }
+  } else {
+    records = MOCK_DATA;
+    save();
+  }
+  switchWorker('A'); // Анх ажилтан А-аар эхэлнэ
+  showDisc('red');
+  if(typeof showObj === 'function') showObj('price');
+};
+
+function save() {
+  localStorage.setItem('mbank_sales_records', JSON.stringify(records));
+}
+
+// Хэрэглэгч/Эрх солих функц (Role Management)
+function switchWorker(val) {
+  currentUser = val;
+  document.getElementById('worker-select').value = val;
+  
+  if(val === 'Ахлах') {
+    isAdmin = true;
+    document.getElementById('current-name').textContent = 'Админ (Ахлах)';
+    document.getElementById('current-avatar').style.background = 'var(--text)';
+    document.getElementById('current-avatar').style.color = 'var(--bg)';
+    document.getElementById('current-avatar').textContent = '👑';
+    document.getElementById('admin-worker-filters').style.display = 'block';
+    document.getElementById('btn-excel-upload').style.display = 'inline-flex';
+    document.getElementById('f-worker').disabled = false; // Бусад ажилтанд хуваарилж болно
+  } else {
+    isAdmin = false;
+    document.getElementById('current-name').textContent = 'Ажилтан ' + val;
+    const colors = {A:'var(--teal)', B:'var(--blue-b)', C:'var(--amber-b)', D:'var(--red-b)'};
+    document.getElementById('current-avatar').style.background = colors[val] || 'var(--teal)';
+    document.getElementById('current-avatar').style.color = '#fff';
+    document.getElementById('current-avatar').textContent = val;
+    document.getElementById('admin-worker-filters').style.display = 'none';
+    document.getElementById('btn-excel-upload').style.display = 'none'; // Энгийн хэрэглэгч импорт хийхгүй
+    document.getElementById('f-worker').disabled = true; // Өөр ажилтан руу шилжүүлж болохгүй
+    
+    currentWorkerFilter = null; 
+    currentFilter = 'all';
+  }
+  
+  renderAll();
+}
+
+function switchPage(page, btn) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + page).style.display = page==='calls' ? 'flex' : 'block';
+}
+
+// Хүснэгт шүүлтүүрийн логик
+function getFiltered() {
+  return records.filter(r => {
+    // Хэрэглэгчийн эрхийн шүүлтүүр: Энгийн ажилтан зөвхөн өөрийнхийгөө харна
+    if(!isAdmin && r.worker !== currentUser) return false;
+    
+    // Сэдэвчилсэн шүүлтүүр (Сонирхолтой, Хүлээлгэ...)
+    if(currentWorkerFilter && r.worker !== currentWorkerFilter) return false;
+    if(currentFilter === 'hot' && r.status !== 'Сонирхолтой') return false;
+    if(currentFilter === 'wait' && r.status !== 'Хүлээлгэ') return false;
+    if(currentFilter === 'cold' && r.status !== 'Татгалзсан' && r.status !== 'Идэвхгүй') return false;
+    if(currentFilter === 'meeting' && !r.meeting) return false;
+    
+    // Тэргүүлэх зэргийн шүүлтүүр
+    if(currentPriorityFilter !== 'all' && r.priority !== currentPriorityFilter) return false;
+    
+    // Хайлт
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    if(q) {
+      const name = (r.name||'').toLowerCase();
+      const phone = (r.phone||'').toLowerCase();
+      const note = (r.note||'').toLowerCase();
+      const loc = (r.loc||'').toLowerCase();
+      if(!name.includes(q) && !phone.includes(q) && !note.includes(q) && !loc.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// Хүснэгт зурах
+function renderTable() {
+  const data = getFiltered();
+  const tbody = document.getElementById('tbody');
+  if(!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty">Бүртгэл олдсонгүй.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = data.map(r => `
+    <tr onclick="openDetail('${r.id}')" style="cursor:pointer">
+      <td><b>${r.name||'—'}</b><br><span style="font-size:11px;color:var(--text3)">${r.phone||'—'}</span></td>
+      <td>${r.loc||'—'}</td>
+      <td><span style="font-size:12px;color:var(--text2)">${r.type||'—'}</span></td>
+      <td><span style="font-weight:500">${r.turnover||'—'}</span></td>
+      <td>${priorityBadge(r.priority)}</td>
+      <td><span style="font-size:12px">${responseLabel(r.response)}</span></td>
+      <td>${workerBadge(r.worker)}</td>
+      <td>${responseBadge(r.response)}</td>
+      <td style="font-size:11px;color:var(--text3)">${fmtDate(r.updatedAt || r.createdAt)}</td>
+      <td style="white-space:nowrap" onclick="event.stopPropagation()">
+        <button class="btn-sec" style="padding:4px 6px;font-size:11px;display:inline-flex;margin-right:2px" onclick="openFollowupModal('${r.id}',event)" title="Статус нэмэх"><i class="ti ti-arrow-forward" style="font-size:12px"></i></button>
+        <button class="btn-sec" style="padding:4px 6px;font-size:11px;display:inline-flex;margin-right:2px" onclick="openModal('${r.id}')" title="Засах"><i class="ti ti-edit" style="font-size:12px"></i></button>
+        
+        ${isAdmin ? `<button class="btn-sec" style="padding:4px 6px;font-size:11px;display:inline-flex;border-color:var(--red-b);color:var(--red-t)" onclick="deleteDirect('${r.id}',event)" title="Устгах"><i class="ti ti-trash" style="font-size:12px"></i></button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderStats() {
+  const base = isAdmin ? records : records.filter(r => r.worker === currentUser);
+  const tot = base.length;
+  const hot = base.filter(r => r.status==='Сонирхолтой').length;
+  const meet = base.filter(r => r.meeting).length;
+  const conv = tot ? Math.round(hot/tot*100) : 0;
+  
+  document.getElementById('st-total').textContent = tot;
+  document.getElementById('st-hot').textContent = hot;
+  document.getElementById('st-meet').textContent = meet;
+  document.getElementById('st-conv').textContent = conv + '%';
+  
+  document.getElementById('cnt-all').textContent = base.length;
+  document.getElementById('cnt-hot').textContent = hot;
+  document.getElementById('cnt-wait').textContent = base.filter(r=>r.status==='Хүлээлгэ').length;
+  document.getElementById('cnt-cold').textContent = base.filter(r=>r.status==='Татгалзсан'||r.status==='Идэвхгүй').length;
+  document.getElementById('cnt-meeting').textContent = meet;
+  
+  if(isAdmin) {
+    ['A','B','C','D'].forEach(w => {
+      document.getElementById('cnt-'+w).textContent = records.filter(r=>r.worker===w).length;
+    });
+  }
+}
+
+function renderAll() {
+  renderStats();
+  renderTable();
+}
+
+function filterView(f, btn) {
+  currentFilter = f;
+  currentWorkerFilter = null;
+  document.querySelectorAll('.sidebar .sb-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const titles = {all:'Бүх дуудлага',hot:'Сонирхолтой харилцагчид',wait:'Хүлээлгийн жагсаалт',cold:'Татгалзсан харилцагчид',meeting:'Уулзалт товлосон'};
+  document.getElementById('view-title').textContent = titles[f] || 'Бүх дуудлага';
+  renderTable();
+}
+
+function filterWorker(w, btn) {
+  currentWorkerFilter = w;
+  currentFilter = 'all';
+  document.querySelectorAll('.sidebar .sb-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-title').textContent = `Ажилтан ${w} -ийн дуудлагууд`;
+  renderTable();
+}
+
+function filterPriority(p, btn) {
+  currentPriorityFilter = p;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+// Modal нээх логик (Эрхийн дагуу талбаруудыг идэвхжүүлэх/хаах)
+function openModal(id) {
+  document.getElementById('modal').classList.add('open');
+  
+  // Нийт талбаруудын жагсаалт
+  const mainFields = ['name', 'phone', 'loc', 'type', 'disc', 'turnover', 'priority', 'worker', 'loan'];
+  
+  if (id) {
+    const r = records.find(x => x.id === id);
+    if(!r) return;
+    document.getElementById('modal-title').textContent = 'Бүртгэл засах';
+    document.getElementById('edit-id').value = id;
+    
+    // Датаг талбаруудад оноох
+    ['name','phone','turnover','note','meeting','callback'].forEach(f => document.getElementById('f-'+f).value = r[f]||'');
+    ['loc','type','disc','priority','worker','response','loan'].forEach(f => document.getElementById('f-'+f).value = r[f]||'');
+    
+    // ЭРХИЙН ХЯНАЛТ: Хэрэв АДМИН БИШ бол үндсэн талбаруудыг disabled (Зөвхөн унших) болгоно
+    if(!isAdmin) {
+      mainFields.forEach(f => document.getElementById('f-' + f).disabled = true);
+      document.getElementById('modal-title').textContent = 'Бүртгэл засах (Ажилтны эрх)';
+    } else {
+      mainFields.forEach(f => document.getElementById('f-' + f).disabled = false);
+    }
+  } else {
+    // Шинээр нэмэх үед
+    document.getElementById('modal-title').textContent = 'Дуудлага бүртгэх';
+    document.getElementById('edit-id').value = '';
+    ['name','phone','turnover','note','meeting','callback'].forEach(f => document.getElementById('f-'+f).value = '');
+    ['loc','type','disc','priority','response'].forEach(f => document.getElementById('f-'+f).value = '');
+    
+    // Шинээр үүсгэхэд талбаруудыг нээлттэй болгох
+    mainFields.forEach(f => document.getElementById('f-' + f).disabled = false);
+    document.getElementById('f-worker').value = currentUser;
+    if(!isAdmin) document.getElementById('f-worker').disabled = true;
+    document.getElementById('f-loan').value = 'Тийм';
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+// Дуудлага хадгалах
+function saveRecord() {
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { alert('Харилцагчийн нэрийг оруулна уу'); return; }
+  
+  const id = document.getElementById('edit-id').value;
+  const now = Date.now();
+  const resp = document.getElementById('f-response').value;
+  
+  let rec = {};
+  if(id) {
+    const orig = records.find(x => x.id === id);
+    if(orig) rec = { ...orig };
+  }
+  
+  // Зөвхөн эрхтэй талбаруудыг шинэчилнэ (Энгийн ажилтан disabled талбарыг өөрчилж чадахгүй)
+  if(isAdmin || !id) {
+    rec.name = name;
+    rec.phone = document.getElementById('f-phone').value.trim();
+    rec.loc = document.getElementById('f-loc').value.trim();
+    rec.type = document.getElementById('f-type').value;
+    rec.disc = document.getElementById('f-disc').value;
+    rec.turnover = document.getElementById('f-turnover').value.trim();
+    rec.priority = document.getElementById('f-priority').value;
+    rec.worker = document.getElementById('f-worker').value;
+    rec.loan = document.getElementById('f-loan').value;
+  }
+  
+  // Дуудлагын үр дүн, тэмдэглэлийг хэн ч өөрчилж болно
+  rec.response = resp;
+  rec.status = getStatus(resp);
+  rec.meeting = document.getElementById('f-meeting').value;
+  rec.callback = document.getElementById('f-callback').value;
+  rec.note = document.getElementById('f-note').value.trim();
+  rec.updatedAt = now;
+  
+  if(id) {
+    rec.history = rec.history || [];
+    rec.history.push({date:now, text:`Мэдээлэл шинэчлэгдсэн — ${responseLabel(resp)}`, worker:currentUser});
+    const idx = records.findIndex(x => x.id === id);
+    if(idx !== -1) records[idx] = rec;
+    toast('Бүртгэл шинэчлэгдлээ ✓');
+  } else {
+    rec.id = String(Date.now());
+    rec.createdAt = now;
+    rec.history = [{date:now, text:'Анхлан бүртгэгдсэн — ' + responseLabel(resp), worker:currentUser}];
+    records.unshift(rec);
+    toast('Дуудлага бүртгэгдлээ ✓');
+  }
+  
+  save();
+  closeModal();
+  renderAll();
+  if(currentDetailId === id) openDetail(id);
+}
+
+// Дахин холбогдох статус нэмэх
+function openFollowupModal(id, e) {
+  if(e) e.stopPropagation();
+  const r = records.find(x => x.id === id);
+  if(!r) return;
+  document.getElementById('followup-id').value = id;
+  document.getElementById('f-followup-response').value = r.response || '';
+  document.getElementById('f-followup-meeting').value = r.meeting || '';
+  document.getElementById('f-followup-callback').value = r.callback || '';
+  document.getElementById('f-followup-note').value = '';
+  document.getElementById('followup-modal').classList.add('open');
+}
+
+function closeFollowupModal() {
+  document.getElementById('followup-modal').classList.remove('open');
+}
+
+function saveFollowup() {
+  const id = document.getElementById('followup-id').value;
+  const r = records.find(x => x.id === id);
+  if(!r) return;
+  
+  const newResp = document.getElementById('f-followup-response').value;
+  const newNote = document.getElementById('f-followup-note').value.trim();
+  const now = Date.now();
+  
+  if(newResp) { r.response = newResp; r.status = getStatus(newResp); }
+  r.meeting = document.getElementById('f-followup-meeting').value;
+  r.callback = document.getElementById('f-followup-callback').value;
+  r.updatedAt = now;
+  
+  r.history = r.history || [];
+  r.history.push({
+    date: now,
+    text: `Дахин залгалт: ${responseLabel(newResp || r.response)}. Тэмдэглэл: ${newNote || 'байхгүй'}`,
+    worker: currentUser
+  });
+  
+  save();
+  closeFollowupModal();
+  renderAll();
+  if(currentDetailId === id) openDetail(id);
+  toast('Түүх нэмэгдлээ ✓');
+}
+
+// Шууд устгах (Зөвхөн Админ)
+function deleteDirect(id, e) {
+  if(e) e.stopPropagation();
+  if(!isAdmin) { alert('Устгах эрх байхгүй'); return; }
+  if(!confirm('Устгахдаа итгэлтэй байна уу?')) return;
+  records = records.filter(r => r.id !== id);
+  if(currentDetailId === id) closeDetail();
+  save();
+  renderAll();
+  toast('Бүртгэл устгагдлаа');
+}
+
+// Хажуугийн дэлгэрэнгүй цонх (Detail Panel)
+function openDetail(id) {
+  currentDetailId = id;
+  const r = records.find(x => x.id === id);
+  if(!r) return;
+  
+  document.getElementById('dp-name').textContent = r.name || '—';
+  document.getElementById('detail-panel').classList.add('open');
+  
+  // Мэдээллийн таб зурах
+  const info = document.getElementById('dp-panel-info');
+  info.innerHTML = `
+    <div class="dp-row"><span class="dp-key">Утас</span><span class="dp-v">${r.phone||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Байршил</span><span class="dp-v">${r.loc||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Төрөл</span><span class="dp-v">${r.type||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Гүйлгээ</span><span class="dp-v">${r.turnover||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">DISC</span><span class="dp-v">${discBadge(r.disc)}</span></div>
+    <div class="dp-row"><span class="dp-key">Тэргүүлэх</span><span class="dp-v">${r.priority||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Ажилтан</span><span class="dp-v">${workerBadge(r.worker)}</span></div>
+    <div class="dp-row"><span class="dp-key">Зээл санал</span><span class="dp-v">${r.loan||'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Уулзалт</span><span class="dp-v">${r.meeting?fmtDate(r.meeting):'—'}</span></div>
+    <div class="dp-row"><span class="dp-key">Дахин залгах</span><span class="dp-v">${r.callback?fmtDate(r.callback):'—'}</span></div>
+    <div style="margin-top:12px">
+      <div class="dp-label">Сүүлийн тайлбар</div>
+      <div class="dp-val" style="background:var(--bg2);padding:8px;border-radius:var(--r);font-style:italic">${r.note||'Тэмдэглэл байхгүй.'}</div>
+    </div>
+    
+    <div style="margin-top:16px;display:flex;gap:6px">
+      <button class="btn-primary" style="flex:1" onclick="openModal('${r.id}')"><i class="ti ti-edit"></i> Засах</button>
+      ${isAdmin ? `<button class="btn-sec" style="border-color:var(--red-b);color:var(--red-t)" onclick="deleteDirect('${r.id}')"><i class="ti ti-trash"></i> Устгах</button>` : ''}
+    </div>
+  `;
+  
+  // Түүхийн таб зурах
+  const hist = document.getElementById('dp-panel-hist');
+  hist.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
+    (r.history && r.history.length ? r.history.map(h => `
+      <div class="history-item">
+        <div class="hist-dot"></div>
+        <div style="width:100%">
+          <div class="hist-text">${h.text}</div>
+          <div class="hist-date">${fmtDate(h.date)} · Ажилтан: <b>${h.worker||'—'}</b></div>
+        </div>
+      </div>
+    `).join('') : '<div class="empty">Түүх байхгүй.</div>') + '</div>';
+    
+  switchDpTab('info', document.querySelector('.dp-tab'));
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  currentDetailId = null;
+}
+
+function switchDpTab(tab, btn) {
+  document.querySelectorAll('.dp-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.dp-tabpanel').forEach(p => p.classList.remove('active'));
+  document.getElementById('dp-panel-' + tab).classList.add('active');
+}
+
+// Спешел функцууд ба туслах хэрэгслүүд
+function getStatus(resp) {
+  if(!resp) return 'Шинэ';
+  if(resp.startsWith('hot')) return 'Сонирхолтой';
+  if(resp.startsWith('wait')) return 'Хүлээлгэ';
+  if(resp.startsWith('cold')) return 'Татгалзсан';
+  return 'Идэвхгүй';
+}
+
+function responseLabel(v) {
+  const m = {hot1:'Уулзалт товлов',hot2:'Мэдээлэл хүссэн',hot3:'Дахин авах сонирхол',wait4:'Дараа авна',wait5:'Дахин залгах',wait6:'Эргэлзэж байна',wait7:'Шаардлага хангахгүй',wait8:'Касс байна',cold9:'Татгалзав',cold10:'Хариу байхгүй',cold11:'Дугаар буруу',cold12:'Дараа залгах',gray13:'Өөр банктай',gray14:'Хаасан/нүүсэн'};
+  return m[v] || v || '—';
+}
+
+function responseBadge(v) {
+  if(!v) return '<span class="badge b-gray">Шинэ</span>';
+  const l = responseLabel(v);
+  if(v.startsWith('hot')) return `<span class="badge b-green">${l}</span>`;
+  if(v.startsWith('wait')) return `<span class="badge b-amber">${l}</span>`;
+  if(v.startsWith('cold')) return `<span class="badge b-red">${l}</span>`;
+  return `<span class="badge b-gray">${l}</span>`;
+}
+
+function discBadge(disc) {
+  const m = {red:'🔴 Улаан',blue:'🔵 Цэнхэр',green:'🟢 Ногоон',yellow:'🟡 Шар'};
+  const bg = {red:'#FEE9E7',blue:'#E6F2FF',green:'#E6F7EE',yellow:'#FFF8E6'};
+  const tc = {red:'#8B2212',blue:'#0C3D80',green:'#1A5C35',yellow:'#7A5000'};
+  if(!disc || !m[disc]) return '';
+  return `<span class="badge" style="background:${bg[disc]};color:${tc[disc]}">${m[disc]}</span>`;
+}
+
+function priorityBadge(p) {
+  if(p==='Өндөр') return '<span class="dot dot-high"></span> Өндөр';
+  if(p==='Дунд') return '<span class="dot dot-mid"></span> Дунд';
+  return '<span class="dot dot-low"></span> Бага';
+}
+
+function workerBadge(w) {
+  const c = {A:'b-teal',B:'b-blue',C:'b-amber',D:'b-red',Ахлах:'b-gray'}[w] || 'b-gray';
+  return `<span class="badge ${c}">${w === 'Ахлах' ? 'Админ' : w}</span>`;
+}
+
+function fmtDate(iso) {
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return iso;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// CSV/Excel экспорт, импорт функцууд
+function triggerExcelInput() {
+  if(!isAdmin) { alert('Зөвхөн админ файл импортлох эрхтэй.'); return; }
+  document.getElementById('excel-file-input').click();
+}
+
+function handleExcelUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      
+      let n = 0;
+      rows.forEach(row => {
+        const name = row['Нэр'] || row['Харилцагч'];
+        if(name) {
+          records.unshift({
+            id: String(Date.now() + n),
+            name: name,
+            phone: String(row['Утас'] || ''),
+            loc: row['Байршил'] || '',
+            type: row['Төрөл'] || '',
+            disc: String(row['DISC'] || '').toLowerCase(),
+            turnover: String(row['Гүйлгээ'] || ''),
+            priority: row['Тэргүүлэх'] || 'Бага',
+            worker: currentUser,
+            response: '',
+            status: 'Шинэ',
+            note: row['Тайлбар'] || 'Excel-ээс импортолсон.',
+            createdAt: Date.now(),
+            history: [{date:Date.now(), text:'Excel-ээр орж ирсэн', worker:currentUser}]
+          });
+          n++;
+        }
+      });
+      if(n > 0) { save(); renderAll(); toast(`${n} харилцагч амжилттай нэмэгдлээ.`); }
+    } catch(err) { toast('Файл уншихад алдаа гарлаа.'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function exportCSV() {
+  const data = getFiltered();
+  const headers = ['Нэр','Утас','Байршил','Төрөл','DISC','Гүйлгээ','Тэргүүлэх','Ажилтан','Хариулт','Тайлбар','Огноо'];
+  const rows = data.map(r => [r.name, r.phone||'', r.loc||'', r.type||'', r.disc||'', r.turnover||'', r.priority||'', r.worker||'', responseLabel(r.response), r.note||'', fmtDate(r.updatedAt || r.createdAt)]);
+  
+  const csvContent = "\uFEFF" + [headers, ...rows].map(e => e.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", `m_bank_sales_report_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// DISC гарын авлага харах
+function showDisc(key, btn) {
+  if(btn) {
+    document.querySelectorAll('#disc-selector .disc-card').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+  const d = DISC_DATA[key];
+  if(!d) return;
+  
+  document.getElementById('disc-detail-view').innerHTML = `
+    <div class="disc-detail">
+      <div class="disc-detail-header" style="background:${d.color}">
+        <div>
+          <div class="disc-detail-title">${d.emoji} ${d.name} Төрөл (${d.code})</div>
+          <div class="disc-detail-sub">${d.quote}</div>
+        </div>
+      </div>
+      <div class="disc-section">
+        <div class="disc-section-title">Ерөнхий зан төлөв</div>
+        <div class="dp-val">${d.who}</div>
+      </div>
+      <div class="disc-section">
+        <div class="disc-section-title">Борлуулалтын тактик</div>
+        ${d.tactics.map(t => `<div class="disc-row"><div class="disc-icon" style="background:${d.bg}">${t.icon}</div><div class="disc-row-text">${t.text}</div></div>`).join('')}
+      </div>
+      <div class="disc-section">
+        <div class="disc-section-title">Утасны Скрипт</div>
+        <div class="script-box">${d.script}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Татгалзал хариулах тактик харах
+function showObj(key, btn) {
+  if(btn) {
+    document.querySelectorAll('.obj-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const obj = OBJECTIONS[key];
+  if(!obj) return;
+  
+  document.getElementById('obj-detail').innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${obj.title}</div>
+      <div style="font-size:13px;color:var(--text3);font-style:italic">${obj.sub}</div>
+    </div>
+    <div class="obj-cards">
+      ${obj.answers.map(a => `
+        <div class="obj-card">
+          <div class="obj-card-header" style="background:${a.color}">${a.emoji} ${a.label} төрөл</div>
+          <div class="obj-card-body">
+            <div style="font-style:italic;line-height:1.55;font-size:13px">${a.text}</div>
+            <div class="obj-push" style="background:${DISC_DATA[a.disc].bg};color:${a.color}">💬 Түлхүүр: ${a.push}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
